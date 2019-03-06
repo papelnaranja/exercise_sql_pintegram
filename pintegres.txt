@@ -1,0 +1,76 @@
+CREATE DATABASE pintagram;
+\c pintagram 
+CREATE TABLE users ( 
+    id SERIAL PRIMARY KEY, 
+    name VARCHAR(20)
+    );
+CREATE TABLE pines (
+    id SERIAL PRIMARY KEY, 
+    user_id INTEGER REFERENCES users(id)
+    );
+CREATE TABLE tags (
+    tag VARCHAR(64) UNIQUE,
+    id SERIAL PRIMARY KEY
+    );
+CREATE TABLE pines_tags ( 
+    pine_id INTEGER REFERENCES pines(id), 
+    tag_id  INTEGER REFERENCES tags(id)
+    );
+CREATE TABLE likes( 
+    user_id INTEGER REFERENCES users(id), 
+    pin_id  INTEGER REFERENCES pines(id)
+    );
+ALTER TABLE likes ADD UNIQUE(user_id, pin_id);
+ALTER TABLE pines ADD COLUMN pin TEXT ;
+INSERT INTO users (name) VALUES 
+    ('vane'),
+    ('ivo'),
+    ('cami'),
+    ('javi'),
+    ('vale');
+INSERT INTO pines (user_id, pin) VALUES 
+    (1, 'http://elamigoinformatico.org/wp-content/uploads/2018/04/84-everytime.png'), 
+    (2, 'https://okdiario.com/img/2018/03/08/origen-dia-mujer-655x368.jpg');
+UPDATE pines SET user_id = 1 WHERE id = 2;
+INSERT INTO pines (user_id, pin) VALUES 
+    (2, 'http://placekitten.com/g/200/300'),
+    (2, 'https://boygeniusreport.files.wordpress.com/2015/06/funny-cat.jpg?quality=98&strip=all'), 
+    (3, 'https://media.giphy.com/media/pOTEhtq8Jv7voNl7mb/giphy.gif'),
+    (3, 'https://media.giphy.com/media/cwbN8LrZwV7Fu/giphy.gif'),  
+    (4, 'http://elamigoinformatico.org/wp-content/uploads/2018/04/84-everytime.png'), 
+    (4, 'https://okdiario.com/img/2018/03/08/origen-dia-mujer-655x368.jpg'),
+    (5, 'https://media.giphy.com/media/pOTEhtq8Jv7voNl7mb/giphy.gif'),
+    (5, 'https://media.giphy.com/media/cwbN8LrZwV7Fu/giphy.gif');
+INSERT INTO tags (tag) VALUES 
+    ('gatos'),
+    ('programación'),
+    ('gif'),
+    ('feminismo'),
+    ('comida'),
+    ('8 de marzo'),
+    ('random'),
+    ('giphy');
+INSERT INTO pines_tags ( pine_id, tag_id ) VALUES 
+    (1,1), (1,2), (1,3), (2,3), (2,1), (2,4), 
+    (3,6), (3,7), (3,8), (4,1), (4,2), (4,3),
+    (5,5), (5,6), (5,7), (6,3), (6,7), (6,8),
+    (7,3), (7,2), (7,5), (8,1), (8,2), (8,3),
+    (8,4), (9,4), (9,7), (9,8), (10,1),(10,2),
+    (10,3); 
+INSERT INTO likes ( user_id, pin_id ) VALUES 
+    (1,2),(2,2),(3,2),
+    (5,1),(3,1),(4,1),
+    (2,3),(3,3),(4,3),
+    (5,4),(4,4),(1,4),
+    (2,5),(4,5),(3,5);
+SELECT pines.pin, COUNT(likes.pin_id) AS pines_likes FROM likes 
+INNER JOIN pines ON likes.pin_id = pines.id GROUP BY pines.pin;
+SELECT users.name, pin FROM users 
+INNER JOIN pines ON users.id = pines.user_id;
+
+SELECT tags.tag, COUNT(pines_tags.tag_id) AS quantaty_tag FROM pines_tags 
+INNER JOIN tags ON tags.id = pines_tags.tag_id
+INNER JOIN pines ON pines.id = pines_tags.pine_id
+GROUP BY(tags.tag);
+
+
